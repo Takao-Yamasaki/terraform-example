@@ -1,9 +1,20 @@
+# プロバイダの定義(東京リージョン)
+provider "aws" {
+	region = "ap-northeast-1"
+}
+
 # ローカル変数の定義
 locals {
 	example_instance_type = "t3.micro"
 }
 
+# 現在のリージョンを取得
+data "aws_region" "current" {}
+
 # 出力値の定義
+output "current_region" {
+	value = data.aws_region.current.name
+}
 output "example_instance_id" {
 	value = aws_instance.example.id
 }
