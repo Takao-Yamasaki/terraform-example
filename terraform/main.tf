@@ -38,17 +38,47 @@ data "aws_ami" "recent_amazon_linux_2" {
 	}
 }
 
+# EC2向けセキュリティグループの定義
+resource "aws_security_group" "example_ec2" {
+	name = "example-ec2"
+
+	# 受信ルール
+	# ポート80(HTTP)で全てのIPアドレスから接続を許可
+	ingress {
+		from_port = 80
+		to_port = 80
+		protocol = "tcp"
+		cidr_blocks = ["0.0.0.0/0"]
+	}
+
+	# 送信ルール
+	egress {
+		from_port = 0
+		to_port = 0
+		protocol = "-1"
+		cidr_blocks = ["0.0.0.0/0"]
+	}
+}
+
 # EC2インスタンスの定義
 resource "aws_instance" "example" {
   ami = data.aws_ami.recent_amazon_linux_2.image_id
   instance_type = local.example_instance_type
+	# セキュリティグループを追加
+	vpc_security_group_ids = [aws_security_group.example_ec2.id]
 
   tags = {
     Name = "example"
   }
+
+	# Apacheのインストール
   user_data = <<EOF
 	#!/bin/bash
 	yum install -y httpd
 	systemctl start httpd.service
 EOF
+}
+
+output "example_public_dns" {
+	value = aws_instance.example.public_dns
 }
