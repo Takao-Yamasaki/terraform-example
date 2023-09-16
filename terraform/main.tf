@@ -71,12 +71,8 @@ resource "aws_instance" "example" {
     Name = "example"
   }
 
-	# Apacheのインストール
-  user_data = <<EOF
-	#!/bin/bash
-	yum install -y httpd
-	systemctl start httpd.service
-EOF
+	# Apacheのインストールスクリプトをファイル読み込み
+  user_data = file("./user_data.sh")
 }
 
 output "example_public_dns" {
